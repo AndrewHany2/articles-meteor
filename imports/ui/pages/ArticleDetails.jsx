@@ -14,8 +14,7 @@ const ArticleDetails = (article) => {
     const [commentLoading, setCommentLoading] = useState(false);
 
     let { id } = useParams();
-    
-    const fetchArticleDetails = (id) => {
+    const fetchArticleDetails = () => {
         return new Promise((resolve, reject) => {
           Meteor.call('getArticleDetails', id, (err, data) => {
             if (err) {
@@ -26,16 +25,7 @@ const ArticleDetails = (article) => {
           });
         });
     };
-
-    const { isPending, error, data } = useQuery({
-        queryKey: ['fetchArticleDetails', { id }],
-        queryFn: () => fetchArticleDetails(id),
-      });
-
-
-    if(isPending) return <LoadingSpinner></LoadingSpinner>
-    if(error) swal('Error', error.message, 'error');
-
+    
     const { commentsWithUsers, loading } = useTracker(() => {
         if (!id) return { commentsWithUsers: [], loading: true };
         const commentsHandle = Meteor.subscribe('comments', id);
@@ -62,9 +52,17 @@ const ArticleDetails = (article) => {
         Meteor.call('addComment', { text: newComment, articleId: id }, (err, data)=>{
             if(err) swal(err.reason);
             setCommentLoading(false);
-            if(data) setNewComment('');
         });
     };
+
+    const { isPending, error, data } = useQuery({
+        queryKey: ['fetchArticle', {id}],
+        queryFn: () => fetchArticleDetails(),
+      });
+
+
+    if(isPending) return <LoadingSpinner></LoadingSpinner>
+    if(error) swal('Error', error.message, 'error');
 
     return (<>
                 <div className="d-flex align-items-center justify-content-center">
