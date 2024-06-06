@@ -9,33 +9,37 @@ import swal from 'sweetalert';
 import { PaginationControl } from 'react-bootstrap-pagination-control';
 import { createSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 
 /* Renders a table containing all of the Article documents. Use <ArticleItem> to render each row. */
 const ListArticle = () => {
-  const [articles, setArticles] = useState([]);
-  const [ready, setReady] = useState(false);
-  const [limit, setLimit] = useState(1);
+  const [limit, setLimit] = useState(10);
   const location = useLocation();
   const navigate = useNavigate();
   const currentPathname = location.pathname;
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(parseInt(searchParams.get('page')) || 1);
-  const [totalCount, setTotalCount] = useState(10);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
-  function getArticles(page, limit) {
-    Meteor.call(`getArticles`, { page, limit, searchQuery } , (err, data)=> {
-      if(err){
-        swal('Error', err.message, 'error');
-        setReady(true);
-      } else {
-        console.log(data);
-        setArticles(data[0].data || []);
-        setTotalCount(data[0].metadata?.[0]?.totalCount || 0);
-        setReady(true);
-      }
+  const fetchArticles = ({ page, limit, searchQuery }) => {
+    return new Promise((resolve, reject) => {
+      Meteor.call('getArticles', { page, limit, searchQuery }, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
     });
-  }
+  };
+
+  const { isPending, error, data } = useQuery({
+    queryKey: ['fetchArticles', { page: searchParams.get('page'), searchQuery: searchParams.get('search') }],
+    queryFn: () => fetchArticles({ page, limit, searchQuery }),
+  });
+
+  const articles = data ? data[0].data : [];
+  const totalCount = data ? data[0].metadata?.[0]?.totalCount : 10;
 
   const handlePageClick = (page) => {
     const q = {page}
@@ -47,15 +51,17 @@ const ListArticle = () => {
   useEffect(() => {
     setPage(parseInt(searchParams.get('page')) || 1);
     setSearchQuery(searchParams.get('search') || '');
-    getArticles(page, limit);
   }, [searchParams]);
 
   const handleChange = (e) => {
     setSearchQuery(e.target.value);
   }
 
-  return (ready ? (
-    <Container className="py-3">
+  if(isPending) return <LoadingSpinner />
+
+  if(error) swal('Error', error.message, 'error');
+
+  return (<Container className="py-3">
       <Row className="justify-content-center">
         <Col md={7}>
           <Col className="text-center">
@@ -99,7 +105,7 @@ const ListArticle = () => {
         </Col>
       </Row>
     </Container>
-  ) : <LoadingSpinner />);
+  );
 };
 
 export default ListArticle;

@@ -19,10 +19,7 @@ import NotAuthorized from '../pages/NotAuthorized';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ArticleDetails from '../pages/ArticleDetails';
 import MyArticles from '../pages/MyArticles';
-import {
-  QueryClient,
-  QueryClientProvider,
-} from '@tanstack/react-query'
+
 
 /** Top-level layout component for this application. Called in imports/startup/client/startup.jsx. */
 const App = () => {
@@ -32,9 +29,7 @@ const App = () => {
       ready: rdy,
     };
   });
-  const queryClient = new QueryClient();
   return (
-    <QueryClientProvider client={queryClient}>
       <Router>
         <div className="d-flex flex-column min-vh-100">
           <NavBar />
@@ -55,8 +50,6 @@ const App = () => {
           <Footer />
         </div>
       </Router>
-    </QueryClientProvider>
-
   );
 };
 

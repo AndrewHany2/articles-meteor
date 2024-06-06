@@ -7,24 +7,34 @@ import swal from "sweetalert";
 import LoadingSpinner from "../components/LoadingSpinner";
 import { useTracker } from 'meteor/react-meteor-data';
 import { Comments } from "../../api/comment/comment";
+import { useQuery } from "@tanstack/react-query";
 
 const ArticleDetails = (article) => {
-    const [articleDetails, setArticleDetails] = useState({});
-    const [ready, setReady] = useState(false);
     const [newComment, setNewComment] = useState('');
     const [commentLoading, setCommentLoading] = useState(false);
 
     let { id } = useParams();
-
-    useEffect(()=>{
-        Meteor.call('getArticleDetails', id, (err, data)=>{
-            if(err){
-                swal('Error', err.reason, 'error')
+    
+    const fetchArticleDetails = (id) => {
+        return new Promise((resolve, reject) => {
+          Meteor.call('getArticleDetails', id, (err, data) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(data);
             }
-            setArticleDetails(data);
-            setReady(true);
+          });
         });
-    },[]);
+    };
+
+    const { isPending, error, data } = useQuery({
+        queryKey: ['fetchArticleDetails', { id }],
+        queryFn: () => fetchArticleDetails(id),
+      });
+
+
+    if(isPending) return <LoadingSpinner></LoadingSpinner>
+    if(error) swal('Error', error.message, 'error');
 
     const { commentsWithUsers, loading } = useTracker(() => {
         if (!id) return { commentsWithUsers: [], loading: true };
@@ -52,22 +62,23 @@ const ArticleDetails = (article) => {
         Meteor.call('addComment', { text: newComment, articleId: id }, (err, data)=>{
             if(err) swal(err.reason);
             setCommentLoading(false);
+            if(data) setNewComment('');
         });
     };
 
     return (<>
-                {ready ? <div className="d-flex align-items-center justify-content-center">
+                <div className="d-flex align-items-center justify-content-center">
                     <Card style={{ width: '70%' }}>
                         <Card.Body>
-                            <Card.Title>{articleDetails.title}</Card.Title>
+                            <Card.Title>{data.title}</Card.Title>
                             <Card.Text>
-                                {articleDetails.description}
+                                {data.description}
                             </Card.Text>
                         </Card.Body>
                         <hr></hr>
                         <h6 className="ms-2">Comments</h6>
                         {commentsWithUsers.map((comment) => {
-                            return ( <Card style={{ width: '100%' }}>
+                            return ( <Card style={{ width: '100%' }} className="my-3">
                             <Card.Body>
                                 <Card.Title className="d-flex justify-content-between">
                                     <div>
@@ -84,10 +95,9 @@ const ArticleDetails = (article) => {
                          </Card>)
                         })}
                         {currentUser && <>
-                            <Form.Group className="mb-3" controlId="exampleForm.ControlTextarea1">
-                                <Form.Label>Comment</Form.Label>
+                            <Form.Group className="m-3" controlId="exampleForm.ControlTextarea1">
                                 <Form.Control as="textarea" rows={3} value={newComment} onChange={(e)=>{
-                                    setNewComment(e.target.value)
+                                    setNewComment(e.target.value);
                                 }}/>
                             </Form.Group>
                             <Button onClick={()=>{
@@ -96,7 +106,7 @@ const ArticleDetails = (article) => {
                         </>}
                         
                     </Card>
-                </div> : <LoadingSpinner></LoadingSpinner>}
+                </div>
             </>
     );
 }

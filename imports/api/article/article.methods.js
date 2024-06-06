@@ -76,11 +76,39 @@ Meteor.methods({
         ]).toArray();
         return article[0];
     },
-    getMyArticles() {
+    async getMyArticles({ page, limit, searchQuery }) {
         if (!this.userId) {
             throw new Meteor.Error('Not authorized.');
         }
-        return Articles.collection.find({ createdById: this.userId }).fetch();
+        const aggregation = [
+            {
+                $match: {
+                    createdById: this.userId
+                }
+            },
+            {
+                $sort: { "createdOn": -1 }
+            },
+            {
+                $facet: {
+                    metadata: [{ $count: 'totalCount' }],
+                    data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+                },
+            },
+        ];
+        if (searchQuery !== '') {
+            aggregation.unshift({
+                $match: {
+                    $or: [
+                        { title: { $regex: searchQuery, $options: 'i' } },
+                        { description: { $regex: searchQuery, $options: 'i' } },
+                        // Add more fields as needed
+                    ]
+                }
+            },);
+        }
+        const articles = await Articles.collection.rawCollection().aggregate(aggregation).toArray();
+        return articles;
     },
     editArticle(article) {
         const { title, description, _id } = article;
