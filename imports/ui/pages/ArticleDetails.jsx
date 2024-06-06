@@ -78,7 +78,7 @@ const ArticleDetails = (article) => {
                         <hr></hr>
                         <h6 className="ms-2">Comments</h6>
                         {commentsWithUsers.map((comment) => {
-                            return ( <Card style={{ width: '100%' }} className="my-3">
+                            return ( <Card style={{ width: '100%' }} className="my-3" key={comment._id}>
                             <Card.Body>
                                 <Card.Title className="d-flex justify-content-between">
                                     <div>
