@@ -7,8 +7,8 @@ Articles.collection.addReducers({
                 $sum: 1
             }
         },
-        reduce(object) {
-            return object.count;
-        },
+        reduce(obj) {
+            return Comments.collection.find({ articleId: obj._id }).count();
+        }
     },
 });

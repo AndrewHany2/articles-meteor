@@ -36,8 +36,8 @@ const MyArticles = () => {
     queryFn: () => fetchMyArticles({ page, limit, searchQuery }),
   });
 
-  const articles = data ? data[0].data : [];
-  const totalCount = data ? data[0].metadata?.[0]?.totalCount : 10;
+  const articles = data ? data.docs : [];
+  const totalCount = data ? data.totalCount: 10;
 
   const handlePageClick = (page) => {
     const q = {page}
@@ -86,7 +86,8 @@ const MyArticles = () => {
             <thead>
               <tr>
                 <th>Title</th>
-                <th>createdOn</th>
+                <th>Description</th>
+                <th>CreatedOn</th>
               </tr>
             </thead>
             <tbody>

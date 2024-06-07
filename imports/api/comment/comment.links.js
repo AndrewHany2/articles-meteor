@@ -9,10 +9,10 @@ Comments.collection.addLinks({
     }
 });
 
-// Comments.collection.addLinks({
-//     'user': {
-//         type: 'one',
-//         collection: Meteor.user,
-//         field: 'createdById'
-//     }
-// });
+Comments.collection.addLinks({
+    'user': {
+        type: 'one',
+        collection: Meteor.users,
+        field: 'createdById'
+    }
+});

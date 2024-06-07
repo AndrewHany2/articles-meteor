@@ -9,3 +9,12 @@ Articles.collection.addLinks({
         field: 'createdById'
     }
 });
+
+Articles.collection.addLinks({
+    comments: {
+        type: 'many',
+        collection: Comments.collection,
+        field: 'articleId',
+        metadata: true
+    },
+});

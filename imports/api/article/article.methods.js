@@ -44,81 +44,146 @@ Meteor.methods({
         // }
         // const articles = await Articles.collection.rawCollection().aggregate(aggregation).toArray();
         // return articles;
-        const articlesQuery = createQuery({
-            text: 1,
+        const queryWithPagination = {
+            $options: {
+                sort: { createdOn: -1 },
+                limit: limit,
+                skip: (page - 1) * limit
+            },
+            // $paginate: true,
+            title: 1,
             description: 1,
             user: {
-                profile: 1 // Assuming the user's name is stored in the profile field
+                username: 1,
+                profile: 1
             },
-        });
+            createdOn: 1
+        };
+        if (searchQuery !== '') {
+            queryWithPagination.$filter = {
+                $or: [
+                    { title: { $regex: searchQuery, $options: 'i' } },
+                    { description: { $regex: searchQuery, $options: 'i' } },
+                    // Add more fields as needed
+                ]
+            }
+        }
+        const articlesQuery = Articles.collection.createQuery(queryWithPagination);
+        const totalCount = articlesQuery.getCount();
         const articles = articlesQuery.fetch();
-        return articles;
+        return { totalCount, docs: articles };
     },
     async getArticleDetails(id) {
-        const article = await Articles.collection.rawCollection().aggregate([
-            { $match: { _id: id } },
-            {
-                $lookup:
-                {
-                    from: "users",
-                    localField: "createdById",
-                    foreignField: "_id",
-                    as: "user"
-                }
+        // const article = await Articles.collection.rawCollection().aggregate([
+        //     { $match: { _id: id } },
+        //     {
+        //         $lookup:
+        //         {
+        //             from: "users",
+        //             localField: "createdById",
+        //             foreignField: "_id",
+        //             as: "user"
+        //         }
+        //     },
+        //     {
+        //         $unwind:
+        //         {
+        //             path: "$user",
+        //             includeArrayIndex: "string",
+        //             preserveNullAndEmptyArrays: false
+        //         }
+        //     },
+        //     {
+        //         $project:
+        //         {
+        //             title: 1,
+        //             description: 1,
+        //             createdOn: 1,
+        //             userName: "$user.profile"
+        //         }
+        //     }
+        // ]).toArray();
+        // return article[0];
+        const articleQuery = await Articles.collection.createQuery({
+            $filter: {
+                _id: id
             },
-            {
-                $unwind:
-                {
-                    path: "$user",
-                    includeArrayIndex: "string",
-                    preserveNullAndEmptyArrays: false
-                }
-            },
-            {
-                $project:
-                {
-                    title: 1,
-                    description: 1,
-                    createdOn: 1,
-                    userName: "$user.profile"
-                }
+            title: 1,
+            description: 1,
+            createdOn: 1,
+            user: {
+                username: 1,
+                profile: 1
             }
-        ]).toArray();
-        return article[0];
+        });
+        const article = articleQuery.fetchOne();
+        return article;
     },
     async getMyArticles({ page, limit, searchQuery }) {
         if (!this.userId) {
             throw new Meteor.Error('Not authorized.');
         }
-        const aggregation = [
-            {
-                $match: {
-                    createdById: this.userId
-                }
+        // const aggregation = [
+        //     {
+        //         $match: {
+        //             createdById: this.userId
+        //         }
+        //     },
+        //     {
+        //         $sort: { "createdOn": -1 }
+        //     },
+        //     {
+        //         $facet: {
+        //             metadata: [{ $count: 'totalCount' }],
+        //             data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+        //         },
+        //     },
+        // ];
+        // if (searchQuery !== '') {
+        //     aggregation.unshift({
+        //         $match: {
+        //             $or: [
+        //                 { title: { $regex: searchQuery, $options: 'i' } },
+        //                 { description: { $regex: searchQuery, $options: 'i' } },
+        //                 // Add more fields as needed
+        //             ]
+        //         }
+        //     },);
+        // }
+        // const articles = await Articles.collection.rawCollection().aggregate(aggregation).toArray();
+        // return articles;
+        const queryWithPagination = {
+            $filter: {
+                createdById: this.userId
             },
-            {
-                $sort: { "createdOn": -1 }
+            $options: {
+                sort: { createdOn: -1 },
+                limit: limit,
+                skip: (page - 1) * limit
             },
-            {
-                $facet: {
-                    metadata: [{ $count: 'totalCount' }],
-                    data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
-                },
+            // $paginate: true,
+            title: 1,
+            description: 1,
+            user: {
+                username: 1,
+                profile: 1
             },
-        ];
+            createdOn: 1
+        };
         if (searchQuery !== '') {
-            aggregation.unshift({
-                $match: {
-                    $or: [
-                        { title: { $regex: searchQuery, $options: 'i' } },
-                        { description: { $regex: searchQuery, $options: 'i' } },
-                        // Add more fields as needed
-                    ]
-                }
-            },);
+            queryWithPagination.$filter = {
+                ...queryWithPagination.$filter,
+                $or: [
+                    { title: { $regex: searchQuery, $options: 'i' } },
+                    { description: { $regex: searchQuery, $options: 'i' } },
+                    // Add more fields as needed
+                ]
+            }
         }
-        const articles = await Articles.collection.rawCollection().aggregate(aggregation).toArray();
-        return articles;
+        const articlesQuery = Articles.collection.createQuery(queryWithPagination);
+        const totalCount = articlesQuery.getCount();
+        const articles = articlesQuery.fetch();
+        return { totalCount, docs: articles };
     },
     editArticle(article) {
         const { title, description, _id } = article;

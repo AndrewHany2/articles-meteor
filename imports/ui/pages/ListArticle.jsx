@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 
 /* Renders a table containing all of the Article documents. Use <ArticleItem> to render each row. */
 const ListArticle = () => {
-  const [limit, setLimit] = useState(10);
+  const [limit, setLimit] = useState(1);
   const location = useLocation();
   const navigate = useNavigate();
   const currentPathname = location.pathname;
@@ -37,9 +37,9 @@ const ListArticle = () => {
     queryKey: ['fetchArticles', { page: searchParams.get('page'), searchQuery: searchParams.get('search') }],
     queryFn: () => fetchArticles({ page, limit, searchQuery }),
   });
-
-  const articles = data ? data[0].data : [];
-  const totalCount = data ? data[0].metadata?.[0]?.totalCount : 10;
+  console.log('data', data);
+  const articles = data?.docs || [];
+  const totalCount = data?.totalCount || 1;
 
   const handlePageClick = (page) => {
     const q = {page}
