@@ -1,14 +1,13 @@
 import { Articles } from "./article";
-
+import { Comments } from "../comment/comment"
 Articles.collection.addReducers({
     commentCount: {
         body: {
-            count: {
-                $sum: 1
-            }
+            _id: 1
         },
         reduce(obj) {
-            return Comments.collection.find({ articleId: obj._id }).count();
+            const count = Comments.collection.find({ articleId: obj._id }).count();
+            return count;
         }
     },
 });

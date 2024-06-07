@@ -13,7 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 
 /* Renders a table containing all of the Article documents. Use <ArticleItem> to render each row. */
 const ListArticle = () => {
-  const [limit, setLimit] = useState(1);
+  const [limit, setLimit] = useState(10);
   const location = useLocation();
   const navigate = useNavigate();
   const currentPathname = location.pathname;
@@ -89,6 +89,7 @@ const ListArticle = () => {
                 <th>Title</th>
                 <th>description</th>
                 <th>createdOn</th>
+                <th>Count</th>
               </tr>
             </thead>
             <tbody>

@@ -57,6 +57,7 @@ Meteor.methods({
                 username: 1,
                 profile: 1
             },
+            commentCount: 1,
             createdOn: 1
         };
         if (searchQuery !== '') {

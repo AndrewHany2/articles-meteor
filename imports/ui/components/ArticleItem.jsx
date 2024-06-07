@@ -8,6 +8,7 @@ const ArticleItem = ({ article, showEdit }) => (
     <td><Link to={`/articles/${article._id}`}>{article.title}</Link></td>
     <td>{article.description}</td>
     <td>{article.createdOn.toLocaleString()}</td>
+    <td>{article.commentCount}</td>
     {showEdit && <td>
       <Link to={`/articles/edit/${article._id}`} state={JSON.stringify(article)}>Edit</Link>
     </td>}
