@@ -1,6 +1,7 @@
 import { Meteor } from 'meteor/meteor';
 import { check } from 'meteor/check';
 import { Articles } from './article';
+import { createQuery } from 'meteor/cultofcoders:grapher';
 
 Meteor.methods({
     addArticle(article) {
@@ -19,29 +20,38 @@ Meteor.methods({
         return newArticle;
     },
     async getArticles({ page, limit, searchQuery }) {
-        const aggregation = [
-            {
-                $sort: { "createdOn": -1 }
+        // const aggregation = [
+        //     {
+        //         $sort: { "createdOn": -1 }
+        //     },
+        //     {
+        //         $facet: {
+        //             metadata: [{ $count: 'totalCount' }],
+        //             data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+        //         },
+        //     },
+        // ];
+        // if (searchQuery !== '') {
+        //     aggregation.unshift({
+        //         $match: {
+        //             $or: [
+        //                 { title: { $regex: searchQuery, $options: 'i' } },
+        //                 { description: { $regex: searchQuery, $options: 'i' } },
+        //                 // Add more fields as needed
+        //             ]
+        //         }
+        //     },);
+        // }
+        // const articles = await Articles.collection.rawCollection().aggregate(aggregation).toArray();
+        // return articles;
+        const articlesQuery = createQuery({
+            text: 1,
+            description: 1,
+            user: {
+                profile: 1 // Assuming the user's name is stored in the profile field
             },
-            {
-                $facet: {
-                    metadata: [{ $count: 'totalCount' }],
-                    data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
-                },
-            },
-        ];
-        if (searchQuery !== '') {
-            aggregation.unshift({
-                $match: {
-                    $or: [
-                        { title: { $regex: searchQuery, $options: 'i' } },
-                        { description: { $regex: searchQuery, $options: 'i' } },
-                        // Add more fields as needed
-                    ]
-                }
-            },);
-        }
-        const articles = await Articles.collection.rawCollection().aggregate(aggregation).toArray();
+        });
+        const articles = articlesQuery.fetch();
         return articles;
     },
     async getArticleDetails(id) {
@@ -118,5 +128,5 @@ Meteor.methods({
             throw new Meteor.Error('Not authorized.');
         }
         return Articles.collection.update(_id, { $set: { title, description } });
-    }
+    },
 });

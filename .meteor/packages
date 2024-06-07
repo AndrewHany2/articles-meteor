@@ -41,3 +41,4 @@ montiapm:agent                   # see http://montiapm.com
 zodern:hide-production-sourcemaps
 hot-module-replacement@0.5.3
 dev-error-overlay@0.1.2
+cultofcoders:grapher
