@@ -19,7 +19,7 @@ Meteor.methods({
         });
         return newArticle;
     },
-    async getArticles({ page, limit, searchQuery }) {
+    async getArticles({ page, limit, searchInput }) {
         // const aggregation = [
         //     {
         //         $sort: { "createdOn": -1 }
@@ -60,11 +60,11 @@ Meteor.methods({
             commentCount: 1,
             createdOn: 1
         };
-        if (searchQuery !== '') {
+        if (searchInput !== '') {
             queryWithPagination.$filters = {
                 $or: [
-                    { title: { $regex: searchQuery, $options: 'i' } },
-                    { description: { $regex: searchQuery, $options: 'i' } },
+                    { title: { $regex: searchInput, $options: 'i' } },
+                    { description: { $regex: searchInput, $options: 'i' } },
                     // Add more fields as needed
                 ]
             }

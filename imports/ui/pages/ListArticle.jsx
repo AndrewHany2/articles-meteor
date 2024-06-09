@@ -20,10 +20,11 @@ const ListArticle = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(parseInt(searchParams.get('page')) || 1);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
+  const [searchInput, setSearchInput] = useState(searchParams.get('search') || '');
 
-  const fetchArticles = ({ page, limit, searchQuery }) => {
+  const fetchArticles = ({ page, limit, searchInput }) => {
     return new Promise((resolve, reject) => {
-      Meteor.call('getArticles', { page, limit, searchQuery }, (err, data) => {
+      Meteor.call('getArticles', { page, limit, searchInput }, (err, data) => {
         if (err) {
           reject(err);
         } else {
@@ -34,8 +35,8 @@ const ListArticle = () => {
   };
 
   const { isPending, error, data } = useQuery({
-    queryKey: ['fetchArticles', { page }],
-    queryFn: () => fetchArticles({ page, limit, searchQuery }),
+    queryKey: ['fetchArticles', { page, searchQuery }],
+    queryFn: () => fetchArticles({ page, limit, searchInput }),
   });
 
   const articles = data?.docs || [];
@@ -54,7 +55,7 @@ const ListArticle = () => {
   }, [searchParams]);
 
   const handleChange = (e) => {
-    setSearchQuery(e.target.value);
+    setSearchInput(e.target.value);
   }
 
   if(isPending) return <LoadingSpinner />
@@ -72,12 +73,13 @@ const ListArticle = () => {
               placeholder="Search..."
               aria-label="Search..."
               aria-describedby="basic-addon2"
-              value={searchQuery}
+              value={searchInput}
               onChange={handleChange}
             />
             <InputGroup.Text id="basic-addon2">
               <Button onClick={()=>{
-                navigate({ pathname: currentPathname, search: createSearchParams({ page: 1, search: searchQuery }).toString() });
+                setSearchParams({ search: searchInput });
+                setSearchQuery(searchInput);
               }}>
                 Search
               </Button>
