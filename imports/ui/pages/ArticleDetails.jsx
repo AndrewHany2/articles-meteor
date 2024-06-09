@@ -29,7 +29,7 @@ const ArticleDetails = (article) => {
 
     const deleteCommentAPI = (comment) => {
         return new Promise((resolve, reject) => {
-          Meteor.call('deleteComment',{commentId: comment._id},  (err, data) => {
+          Meteor.call('deleteComment',{commentId: comment},  (err, data) => {
             if (err) {
               reject(err);
             } else {
