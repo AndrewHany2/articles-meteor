@@ -61,7 +61,7 @@ Meteor.methods({
             createdOn: 1
         };
         if (searchQuery !== '') {
-            queryWithPagination.$filter = {
+            queryWithPagination.$filters = {
                 $or: [
                     { title: { $regex: searchQuery, $options: 'i' } },
                     { description: { $regex: searchQuery, $options: 'i' } },
@@ -154,7 +154,7 @@ Meteor.methods({
         // const articles = await Articles.collection.rawCollection().aggregate(aggregation).toArray();
         // return articles;
         const queryWithPagination = {
-            $filter: {
+            $filters: {
                 createdById: this.userId
             },
             $options: {
@@ -172,8 +172,8 @@ Meteor.methods({
             createdOn: 1
         };
         if (searchQuery !== '') {
-            queryWithPagination.$filter = {
-                ...queryWithPagination.$filter,
+            queryWithPagination.$filters = {
+                ...queryWithPagination.$filters,
                 $or: [
                     { title: { $regex: searchQuery, $options: 'i' } },
                     { description: { $regex: searchQuery, $options: 'i' } },
