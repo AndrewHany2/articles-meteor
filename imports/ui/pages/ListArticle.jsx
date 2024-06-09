@@ -34,10 +34,10 @@ const ListArticle = () => {
   };
 
   const { isPending, error, data } = useQuery({
-    queryKey: ['fetchArticles', { page, searchQuery }],
+    queryKey: ['fetchArticles', { page }],
     queryFn: () => fetchArticles({ page, limit, searchQuery }),
   });
-  console.log('data', data);
+
   const articles = data?.docs || [];
   const totalCount = data?.totalCount || 1;
 
