@@ -25,9 +25,8 @@ const AddArticle = () => {
   // On submit, insert the data.
   const submit = (data) => {
     const { title, description } = data;
-    const createdById = Meteor.user().username;
     setLoading(true);
-    Meteor.call('addArticle', { title, description, createdById }, (err, data)=>{
+    Meteor.call('addArticle', { title, description }, (err, data)=>{
       if(err) swal(err.reason);
       else {
         navigate(`/articles/${data}`);

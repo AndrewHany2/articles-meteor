@@ -10,7 +10,7 @@ const ArticleItem = ({ article, showEdit }) => (
     <td>{article.createdOn.toLocaleString()}</td>
     <td>{article.commentCount}</td>
     {showEdit && <td>
-      <Link to={`/articles/edit/${article._id}`} state={JSON.stringify(article)}>Edit</Link>
+      <Link to={`/articles/${article._id}/edit`} state={JSON.stringify(article)}>Edit</Link>
     </td>}
   </tr>
 );

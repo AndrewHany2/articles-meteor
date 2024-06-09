@@ -35,14 +35,14 @@ const App = () => {
           <NavBar />
           <Routes>
             <Route exact path="/" element={<Landing />} />
-            <Route path="/signin" element={<SignIn />} />
-            <Route path="/signup" element={<SignUp />} />
+            <Route path="/login" element={<SignIn />} />
+            <Route path="/register" element={<SignUp />} />
             <Route path="/signout" element={<SignOut />} />
             <Route path="/articles/:id" element={<ArticleDetails></ArticleDetails>} />
             <Route path="/home" element={<ProtectedRoute><Landing /></ProtectedRoute>} />
             <Route path="/articles/mine" element={<ProtectedRoute><MyArticles /></ProtectedRoute>} />
-            <Route path="/add" element={<ProtectedRoute><AddArticle /></ProtectedRoute>} />
-            <Route path="/articles/edit/:_id" element={<ProtectedRoute><EditArticle /></ProtectedRoute>} />
+            <Route path="/articles/add" element={<ProtectedRoute><AddArticle /></ProtectedRoute>} />
+            <Route path="/articles/:_id/edit" element={<ProtectedRoute><EditArticle /></ProtectedRoute>} />
             <Route path="/notauthorized" element={<NotAuthorized />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
