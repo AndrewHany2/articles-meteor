@@ -43,7 +43,7 @@ Meteor.methods({
         //     },);
         // }
         // const articles = await Articles.collection.rawCollection().aggregate(aggregation).toArray();
-        // return articles;
+        // return { totalCount: articles[0].metadata[0].totalCount, docs: articles[0].data };
         const queryWithPagination = {
             $options: {
                 sort: { createdOn: -1 },
@@ -106,7 +106,7 @@ Meteor.methods({
         // ]).toArray();
         // return article[0];
         const articleQuery = await Articles.collection.createQuery({
-            $filter: {
+            $filters: {
                 _id: id
             },
             title: 1,
@@ -193,6 +193,6 @@ Meteor.methods({
         if (!this.userId) {
             throw new Meteor.Error('Not authorized.');
         }
-        return Articles.collection.update(_id, { $set: { title, description } });
+        return Articles.collection.update({ _id, createdById: this.userId }, { $set: { title, description } });
     },
 });

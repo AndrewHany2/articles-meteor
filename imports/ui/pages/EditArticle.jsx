@@ -43,7 +43,7 @@ const EditArticle = () => {
   
   const submit = (values) => {
     setLoading(true);
-    Meteor.call('editArticle', values, (err, data) => {
+    Meteor.call('editArticle', { ...values, _id }, (err, data) => {
       if(err){
         swal('Error', err.reason, 'error');
       } else {
