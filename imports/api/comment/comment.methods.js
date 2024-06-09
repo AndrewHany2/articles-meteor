@@ -16,5 +16,10 @@ Meteor.methods({
             createdById: this.userId,
         });
         return newComment;
+    },
+    deleteComment({ commentId }) {
+        check(commentId, String);
+        if (!this.userId) throw new Meteor.Error('Not authorized.');
+        return Comments.collection.remove({ _id: commentId, createdById: this.userId });
     }
 });

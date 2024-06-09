@@ -32,7 +32,7 @@ const MyArticles = () => {
   };
 
   const { isPending, error, data } = useQuery({
-    queryKey: ['fetchMyArticles', { page: searchParams.get('page'), searchQuery: searchParams.get('search') }],
+    queryKey: ['fetchMyArticles', { page, searchQuery }],
     queryFn: () => fetchMyArticles({ page, limit, searchQuery }),
   });
 
@@ -101,6 +101,7 @@ const MyArticles = () => {
             limit={limit}
             changePage={handlePageClick}
           />
+            <div>Total Count: {totalCount}</div>
         </Col>
       </Row>
     </Container>

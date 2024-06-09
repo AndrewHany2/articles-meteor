@@ -187,12 +187,13 @@ Meteor.methods({
         return { totalCount, docs: articles };
     },
     editArticle(article) {
-        const { title, description, _id } = article;
+        const { title, description, id } = article;
         check(title, String);
         check(description, String);
+        check(id, String);
         if (!this.userId) {
             throw new Meteor.Error('Not authorized.');
         }
-        return Articles.collection.update({ _id, createdById: this.userId }, { $set: { title, description } });
+        return Articles.collection.update({ _id: id, createdById: this.userId }, { $set: { title, description } });
     },
 });

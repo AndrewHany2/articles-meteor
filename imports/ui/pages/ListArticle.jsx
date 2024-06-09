@@ -34,7 +34,7 @@ const ListArticle = () => {
   };
 
   const { isPending, error, data } = useQuery({
-    queryKey: ['fetchArticles', { page: searchParams.get('page'), searchQuery: searchParams.get('search') }],
+    queryKey: ['fetchArticles', { page, searchQuery }],
     queryFn: () => fetchArticles({ page, limit, searchQuery }),
   });
   console.log('data', data);
@@ -42,7 +42,7 @@ const ListArticle = () => {
   const totalCount = data?.totalCount || 1;
 
   const handlePageClick = (page) => {
-    const q = {page}
+    const q = { page };
     if(searchQuery !== '') q.search = searchQuery;
     navigate({ pathname: currentPathname, search: createSearchParams(q).toString() });
     setSearchParams(createSearchParams(q));
@@ -103,8 +103,9 @@ const ListArticle = () => {
             limit={limit}
             changePage={handlePageClick}
           />
+            <div>Total Count: {totalCount}</div>
         </Col>
-      </Row>
+    </Row>
     </Container>
   );
 };

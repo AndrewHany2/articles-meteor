@@ -14,6 +14,7 @@ const ArticleDetails = (article) => {
     const [commentLoading, setCommentLoading] = useState(false);
 
     let { id } = useParams();
+
     const fetchArticleDetails = () => {
         return new Promise((resolve, reject) => {
           Meteor.call('getArticleDetails', id, (err, data) => {
@@ -25,6 +26,25 @@ const ArticleDetails = (article) => {
           });
         });
     };
+
+    const deleteCommentAPI = (comment) => {
+        return new Promise((resolve, reject) => {
+          Meteor.call('deleteComment',{commentId: comment._id},  (err, data) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(data);
+            }
+          });
+        });
+    };
+
+    deleteComment = (comment) => {
+        deleteCommentAPI(comment._id).then(()=>{}).catch((err)=>{
+            swal('Error', err.message, 'error');
+        })
+    }
+
     
     const { commentsWithUsers, loading } = useTracker(() => {
         if (!id) return { commentsWithUsers: [], loading: true };
@@ -43,11 +63,12 @@ const ArticleDetails = (article) => {
         return { commentsWithUsers, loading };
     }, [id]);
 
-    const { currentUser } = useTracker(() => ({
+    const { currentUser, createdById } = useTracker(() => ({
         currentUser: Meteor.user() ? Meteor.user()?.profile : '',
+        createdById: Meteor.user() ? Meteor.user()?._id : '',
     }), []);
 
-    const addComment = (newComment) => {
+    const addComment = (comment) => {
         setCommentLoading(true);
         Meteor.call('addComment', { text: newComment, articleId: id }, (err, data)=>{
             if(err) swal(err.reason);
@@ -80,7 +101,7 @@ const ArticleDetails = (article) => {
                             <Card.Body>
                                 <Card.Title className="d-flex justify-content-between">
                                     <div>
-                                        {comment.user.profile}
+                                        {comment?.user?.profile}
                                     </div>
                                     <div>
                                         {comment.createdOn.toLocaleString()}
@@ -89,6 +110,13 @@ const ArticleDetails = (article) => {
                                 <Card.Text>
                                     {comment.text}
                                 </Card.Text>
+                                {
+                                    comment.createdById === createdById && <Button
+                                        onClick={()=>{
+                                          deleteComment(comment);  
+                                        }}
+                                    >Delete</Button>
+                                }
                             </Card.Body>
                          </Card>)
                         })}

@@ -25,7 +25,6 @@ const NavBar = () => {
               <Nav.Link id="add-article-nav" as={NavLink} to="/add" key="add">Add Article</Nav.Link>,
               <Nav.Link id="add-article-nav" as={NavLink} to="/articles/mine" key="add">My Articles</Nav.Link>
             ]) : ''}
-            <Nav.Link id="list-article-nav" as={NavLink} to="/list" key="list">List Article</Nav.Link>
             {Roles.userIsInRole(Meteor.userId(), 'admin') ? (
               <Nav.Link id="list-article-admin-nav" as={NavLink} to="/admin" key="admin">Admin</Nav.Link>
             ) : ''}

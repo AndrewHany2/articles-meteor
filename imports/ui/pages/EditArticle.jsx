@@ -1,41 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import swal from 'sweetalert';
 import { Meteor } from 'meteor/meteor';
-import { useTracker } from 'meteor/react-meteor-data';
 import { useParams } from 'react-router';
-import { Articles } from '../../api/article/article';
 import LoadingSpinner from '../components/LoadingSpinner';
-import { Formik } from 'formik';
+import { Formik, useFormik } from 'formik';
 import TextField from '../components/TextInput';
-import { useLocation } from "react-router-dom";
 import * as Yup from 'yup';
 import { Card, Col, Container, Row, Form, Button, Alert } from 'react-bootstrap';
+import { useQuery } from '@tanstack/react-query';
 
 
 /* Renders the EditArticle page for editing a single document. */
 const EditArticle = () => {
   // Get the documentID from the URL field. See imports/ui/layouts/App.jsx for the route containing :_id.
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
-  const { _id } = useParams();
-  const location = useLocation();
-  const state = JSON.parse(location.state);
-  const [initialValues, setInitialValues] = useState({title: state.title , description: state.description});
+  const { _id: id } = useParams();
+  const [initialValues, setInitialValues] = useState({ title: '', description: '' });
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
 
-  // useTracker connects Meteor data to React components. https://guide.meteor.com/react.html#using-withTracker
-  const { doc, ready } = useTracker(() => {
-    // Get access to Article documents.
-    const subscription = Meteor.subscribe(Articles.userPublicationName);
-    // Determine if the subscription is ready
-    const rdy = subscription.ready();
-    // Get the document
-    const document = Articles.collection.findOne(_id);
-    return {
-      doc: document,
-      ready: rdy,
-    };
-  }, [_id]);
-  // On successful submit, insert the data.
+  const fetchArticleDetails = () => {
+    return new Promise((resolve, reject) => {
+      Meteor.call('getArticleDetails', id, (err, data) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data);
+        }
+      });
+    });
+  };
+
+const { isPending, error, data } = useQuery({
+  queryKey: ['fetchArticle', {id}],
+  queryFn: () => fetchArticleDetails(),
+});
+
   const schema = Yup.object().shape({
       title: Yup.string().required(),
       description: Yup.string().required(),
@@ -43,7 +43,7 @@ const EditArticle = () => {
   
   const submit = (values) => {
     setLoading(true);
-    Meteor.call('editArticle', { ...values, _id }, (err, data) => {
+    Meteor.call('editArticle', { ...values, id }, (err, data) => {
       if(err){
         swal('Error', err.reason, 'error');
       } else {
@@ -54,23 +54,28 @@ const EditArticle = () => {
     setLoading(false);
   };
 
-  return ready ? (
+  const formik = useFormik({
+    initialValues: initialValues,
+    validationSchema: schema,
+    onSubmit: submit,
+    enableReinitialize: true,
+  });
+  const { errors, touched, handleSubmit, handleChange, values, setFieldValue } = formik;
+  
+  useEffect(()=>{
+    if(data) setInitialValues({ title:data.title, description: data.description});
+  },[data]);
+
+  if(isPending) return <LoadingSpinner></LoadingSpinner>
+
+  if(error) swal('Error', error.message, 'error');
+
+  
+  return (
     <Container className="py-3">
       <Row className="justify-content-center">
         <Col xs={5}>
           <Col className="text-center"><h2>Edit Article</h2></Col>
-          <Formik
-            initialValues={initialValues}
-            validationSchema={schema}
-            onSubmit={submit}
-          >
-          {({  
-            errors,
-            values,
-            touched,
-            handleSubmit,
-            handleChange
-         }) => (
           <Form noValidate onSubmit={handleSubmit}>
             <div>
               <TextField
@@ -109,12 +114,10 @@ const EditArticle = () => {
                   Submit
               </Button>}
           </Form>
-        )}
-         </Formik>
         </Col>
       </Row>
     </Container>
-  ) : <LoadingSpinner />;
+  );
 };
 
 export default EditArticle;
