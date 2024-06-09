@@ -72,6 +72,9 @@ const ArticleDetails = (article) => {
         setCommentLoading(true);
         Meteor.call('addComment', { text: newComment, articleId: id }, (err, data)=>{
             if(err) swal(err.reason);
+            else {
+                setNewComment('');
+            }
             setCommentLoading(false);
         });
     };
